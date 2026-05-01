@@ -15,8 +15,8 @@ namespace Kinetra.Graphics
 
             GL.BufferData(
                 BufferTarget.ArrayBuffer,             
-                mesh.vertices.Length * sizeof(float), // tamanho do VBO em bytes
-                mesh.vertices,                        // dados dos vértices
+                mesh.vertexBuffer.Length * sizeof(float), 
+                mesh.vertexBuffer,                    // dados dos vértices
                 mode                                  // uso pretendido
             );
 
@@ -27,17 +27,19 @@ namespace Kinetra.Graphics
                 mode                                  // uso pretendido
             );
 
-            // layout(location = 0) no shader
-            GL.VertexAttribPointer(
-                0,                               // localização
-                vertexcount,                     // número de componentes por vértice
-                VertexAttribPointerType.Float,   // tipo de dado
-                normalized,                      // normalização
-                vertexcount * sizeof(float),     // stride (tamanho de cada vértice)
-                offset                           // offset
-            );
+            foreach (var attr in mesh.layout.Attributes)
+            {
+                GL.VertexAttribPointer(
+                    attr.Location,
+                    attr.Size,
+                     VertexAttribPointerType.Float, // Assumindo float para simplicidade, pode ser ajustado para outros tipos
+                    attr.Normalized,
+                    mesh.layout.Stride,
+                    attr.Offset
+                );
 
-            GL.EnableVertexAttribArray(0);
+                GL.EnableVertexAttribArray(attr.Location);
+            }
         }
 
         public void Bind()

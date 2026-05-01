@@ -29,3 +29,4 @@ C:\Users\Administrador\Desktop\Projects\kinetra\obj\Debug\net10.0\refint\kinetra
 C:\Users\Administrador\Desktop\Projects\kinetra\obj\Debug\net10.0\kinetra.pdb
 C:\Users\Administrador\Desktop\Projects\kinetra\obj\Debug\net10.0\kinetra.genruntimeconfig.cache
 C:\Users\Administrador\Desktop\Projects\kinetra\obj\Debug\net10.0\ref\kinetra.dll
+C:\Users\Administrador\Desktop\Projects\kinetra\bin\Debug\net10.0\StbImageSharp.dll

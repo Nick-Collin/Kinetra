@@ -9,6 +9,11 @@ namespace Kinetra.Render
         {
             foreach (var entity in scene.Entities)
             {
+                if (entity.material.shader == null)
+                {
+                    Console.WriteLine("Shader null!");
+                    return;
+                }
                 entity.material.shader.Use();
                 entity.buffer.Bind();
                 GL.DrawElements(
