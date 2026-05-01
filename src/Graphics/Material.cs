@@ -4,11 +4,29 @@ namespace Kinetra.Graphics
 {
     public class Material
     {
-        public Shader shader;
+        public Shader? shader;
+        private readonly string shaders_path = "shaders\\";
 
-        public Material(string vertexPath=@"shaders\shader.vert", string fragmentPath=@"shaders\shader.frag")
+        public Material(string shaderName = "default")
         {
-            this.shader = new Shader(vertexPath, fragmentPath);
+            LoadShader(shaderName);
+        }
+
+        public void LoadShader(string shaderName)
+        {
+            string vertexPath = Path.Combine(shaders_path, shaderName + "\\" + shaderName + ".vert");
+            Console.WriteLine(vertexPath);
+            string fragmentPath = Path.Combine(shaders_path, shaderName + "\\" + shaderName + ".frag");
+            Console.WriteLine(fragmentPath);
+
+            if (!File.Exists(vertexPath) || !File.Exists(fragmentPath))
+            {
+                Console.WriteLine($"Shader files not found: {vertexPath} or {fragmentPath}");
+                return;
+            }
+
+            shader?.Dispose(); // Dispose do shader antigo, se existir
+            shader = new Shader(vertexPath, fragmentPath);
         }
 
         public void Dispose()
