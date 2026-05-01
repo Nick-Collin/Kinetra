@@ -1,6 +1,6 @@
 namespace Kinetra.Render
 {
-    public class Shader
+    public class Shader : IDisposable
     {
         int Handle;
 
