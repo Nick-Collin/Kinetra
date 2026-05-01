@@ -1,24 +1,33 @@
 ﻿using Kinetra.Render;
-using Kinetra.Objects;
+using Kinetra.Core;
+using Kinetra.Graphics;
 
 public class Program
 {
     static void Main()
     {
-        using (var game = new Game())
+        using (var window = new KinetraWindow())
         {
-            float[] vertices =
-            {
-                0.0f,  0.5f, 0.0f,  // topo
-               -0.5f, -0.5f, 0.0f,  // esquerda
-                0.5f, -0.5f, 0.0f   // direita
+            float[] vertices = {
+                 0.5f,  0.5f, 0.0f,  // top right
+                 0.5f, -0.5f, 0.0f,  // bottom right
+                -0.5f, -0.5f, 0.0f,  // bottom left
+                -0.5f,  0.5f, 0.0f   // top left
             };
 
-            Triangle triangle = new Triangle(vertices);
+            uint[] indices = {  // note that we start from 0!
+                0, 1, 3,   // first triangle
+                1, 2, 3    // second triangle
+            };
+            
 
-            game.scene.Add(triangle);         
+            var mesh = new Mesh(vertices, indices);
+            var material = new Material();
+            var entity = new Entity(mesh, material);
 
-            game.Run();
+            window.scene.Add(entity);
+
+            window.Run();
         }
     }
 }

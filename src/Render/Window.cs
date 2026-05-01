@@ -1,11 +1,13 @@
+using Kinetra.Core;
+
 namespace Kinetra.Render
 {
-    public class Game : GameWindow
+    public class KinetraWindow : GameWindow
     {
+        private Renderer renderer = new();
         public Scene scene = new();
-        private Shader? shader;
 
-        public Game() : base(GameWindowSettings.Default, NativeWindowSettings.Default)
+        public KinetraWindow() : base(GameWindowSettings.Default, NativeWindowSettings.Default)
         {
             this.Size = new Vector2i(800, 600);
             this.Title = "Kinetra";
@@ -25,15 +27,13 @@ namespace Kinetra.Render
         {
             base.OnLoad();
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            this.shader = new Shader(@"shaders\shader.vert", @"shaders\shader.frag");
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) // When rendering the hidden buffer
         {
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            shader?.Use();
-            scene.Render();
+            renderer.Draw(scene);
             SwapBuffers();
         }
         
@@ -46,7 +46,6 @@ namespace Kinetra.Render
         protected override void OnUnload() // When closing the window
         {
             base.OnUnload();
-            shader?.Dispose();
             scene.Dispose();
         }
         
