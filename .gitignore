@@ -1,2 +1,10 @@
 bin/ 
 bin/*
+obj/ 
+obj/*
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.exe 

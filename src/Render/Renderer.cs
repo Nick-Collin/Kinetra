@@ -14,7 +14,7 @@ namespace Kinetra.Render
                     Console.WriteLine("Shader null!");
                     return;
                 }
-                entity.material.shader.Use();
+                entity.material.Use();
                 entity.buffer.Bind();
                 GL.DrawElements(
                     PrimitiveType.Triangles,             // tipo de primitiva 
