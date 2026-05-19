@@ -5,11 +5,26 @@ namespace Kinetra.Graphics
     public class Material
     {
         public Shader? shader;
+        public Texture? texture;
         private readonly string shaders_path = "shaders\\";
 
-        public Material(string shaderName = "default")
+        public Material(string shaderName = "default", string? texturePath = null)
         {
             LoadShader(shaderName);
+
+            if (texturePath != null)
+                texture = new Texture(texturePath);
+        }
+
+        public void Use()
+        {
+            shader?.Use();
+
+            if (texture != null)
+            {
+                GL.ActiveTexture(TextureUnit.Texture0);
+                texture.Use();
+            }
         }
 
         public void LoadShader(string shaderName)
