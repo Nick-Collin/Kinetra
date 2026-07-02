@@ -1,21 +1,24 @@
 public class Camera
 {
     public Vector3 position = Vector3.Zero;
-    public Quaternion rotation = Quaternion.Identity;
+    public float yaw = 0f;
+    public float pitch = 0f;
+
+    private Quaternion Rotation => Quaternion.FromAxisAngle(Vector3.UnitY, yaw) * Quaternion.FromAxisAngle(Vector3.UnitX, pitch);
         
     public Vector3 Forward =>
-    Vector3.Normalize(Vector3.Transform(-Vector3.UnitZ, rotation));
+    Vector3.Normalize(Vector3.Transform(-Vector3.UnitZ, Rotation));
 
     public Vector3 Right =>
-        Vector3.Normalize(Vector3.Transform(Vector3.UnitX, rotation));
+        Vector3.Normalize(Vector3.Transform(Vector3.UnitX, Rotation));
 
     public Vector3 Up =>
-        Vector3.Normalize(Vector3.Transform(Vector3.UnitY, rotation));
+        Vector3.Normalize(Vector3.Transform(Vector3.UnitY, Rotation));
     public Matrix4 GetViewMatrix()
     {
-        var f = Vector3.Normalize(Forward);
-        var r = Vector3.Normalize(Right);
-        var u = Vector3.Normalize(Up);
+        var f = Forward;
+        var r = Right;
+        var u = Up;
 
         var rot = new Matrix4(
             r.X, u.X, -f.X, 0,

@@ -43,6 +43,7 @@ public class CameraLogic : FrameUpdateLogic
     private Vector2 lastMouse;
     private bool firstMove = true;
     private float sensitivity = 0.005f;
+    private float pitch_clamp = MathHelper.DegreesToRadians(89.0f);
     public void Execute(Scene scene, float dt, KeyboardState keyboard, MouseState mouse, Vector2 windowSize, bool isFocused)
     {
         if (!isFocused) // check to see if the window is focused
@@ -94,15 +95,8 @@ public class CameraLogic : FrameUpdateLogic
         float yawDelta = -delta.X * sensitivity;
         float pitchDelta = -delta.Y * sensitivity;
 
-        var yawRot = Quaternion.FromAxisAngle(Vector3.UnitY, yawDelta);
-        var right = scene.camera.Right;
-
-        var pitchRot = Quaternion.FromAxisAngle(right, pitchDelta);
-
-        // aplica incrementalmente
-        scene.camera.rotation = Quaternion.Normalize(
-            pitchRot * yawRot * scene.camera.rotation
-        );
+        scene.camera.yaw += yawDelta;
+        scene.camera.pitch = MathHelper.Clamp(scene.camera.pitch + pitchDelta, -pitch_clamp, pitch_clamp);
 
     }
 }
