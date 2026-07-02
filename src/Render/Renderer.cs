@@ -2,16 +2,16 @@ using Kinetra.Core;
 
 namespace Kinetra.Render
 {
-public interface IRenderPass
+public interface RenderPass
 {
     void Execute(Scene scene);
 }
 
 public class Renderer
 {
-    private IRenderPass? pass;
+    private RenderPass? pass;
 
-    public void SetRenderPass(IRenderPass pass)
+    public void SetRenderPass(RenderPass pass)
     {
         this.pass = pass;
     }

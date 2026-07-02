@@ -67,7 +67,7 @@ namespace Kinetra.Render
             Scene.Dispose();
         }
 
-        public void AddRenderPass(IRenderPass pass)
+        public void AddRenderPass(RenderPass pass)
         {
             renderer.SetRenderPass(pass);
         }

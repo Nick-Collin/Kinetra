@@ -22,7 +22,7 @@ namespace Kinetra.Core
 
             var s = Matrix4.CreateScale(scale);
 
-            return t * r * s;
+            return  r * t * s;
         }
 
         public void SetEuler(Vector3 eulerDegrees)

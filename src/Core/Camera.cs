@@ -1,8 +1,11 @@
+namespace Kinetra.Core
+{
 public class Camera
 {
     public Vector3 position = Vector3.Zero;
     public float yaw = 0f;
     public float pitch = 0f;
+    public Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(90.0f), 800f / 600f, 0.1f, 100.0f);
 
     private Quaternion Rotation => Quaternion.FromAxisAngle(Vector3.UnitY, yaw) * Quaternion.FromAxisAngle(Vector3.UnitX, pitch);
         
@@ -14,21 +17,16 @@ public class Camera
 
     public Vector3 Up =>
         Vector3.Normalize(Vector3.Transform(Vector3.UnitY, Rotation));
+
     public Matrix4 GetViewMatrix()
     {
-        var f = Forward;
-        var r = Right;
-        var u = Up;
+        
+        var rotation = Matrix4.CreateFromQuaternion(Quaternion.Invert(Rotation));
+        var translation = Matrix4.CreateTranslation(-position);
 
-        var rot = new Matrix4(
-            r.X, u.X, -f.X, 0,
-            r.Y, u.Y, -f.Y, 0,
-            r.Z, u.Z, -f.Z, 0,
-            0,   0,    0,   1
-        );
+        return translation * rotation;
+        
 
-        var trans = Matrix4.CreateTranslation(-position);
-
-        return trans * rot;
     }
+}
 }

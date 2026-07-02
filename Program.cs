@@ -1,131 +1,28 @@
 ﻿using Kinetra.Render;
 using Kinetra.Core;
 using Kinetra.Graphics;
+using Kinetra.Defaults;
 
-public class RenderLogic : IRenderPass
+public class InputMovementSystem : FrameUpdateLogic
 {
-    public void Execute(Scene scene)
+    public void Execute(Scene scene, float dt, KeyboardState keyboard, MouseState mouse, Vector2 windowSize, bool isFocused)
     {
-
-        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(90.0f), 800f / 600f, 0.1f, 100.0f);
-        GL.Enable(EnableCap.DepthTest);
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         foreach (var entity in scene.Entities)
         {
-            var model = entity.transform.GetModelMatrix();
-            entity.material?.shader?.SetMatrix4("model", model);
+            if (entity is Point p){
+                if (keyboard.IsKeyDown(Keys.Up))
+                    p.transform.translation += new Vector3(0f, 0.1f, 0f) * dt;
 
-            entity.material?.Use();
-            entity.buffer.Bind();
+                if (keyboard.IsKeyDown(Keys.Down))
+                    p.transform.translation += new Vector3(0f, -0.1f, 0f) * dt;
 
-            if (scene.camera == null)
-                entity.material?.shader?.SetMatrix4("view", Matrix4.Identity);
-            else
-                entity.material?.shader?.SetMatrix4("view", scene.camera.GetViewMatrix());
-
-            entity.material?.shader?.SetMatrix4("projection", projection);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+                //Console.Out.WriteLine($"Point position: {p.transform.translation}");
+            }
+            if (entity is Plane pl){
+                //Console.Out.WriteLine($"Plane position: {pl.transform.translation}");
+            }
         }
-    }
-}
-
-public class Newframe : FrameUpdateLogic
-{
-    public void Execute(Scene scene, float dt, KeyboardState keyboard, MouseState mouse, Vector2 windowSize, bool isFocused)
-    {
-        scene.Update(dt);
-    }
-}
-
-public class CameraLogic : FrameUpdateLogic
-{
-    private float move_speed = 0.0005f;
-    private Vector2 lastMouse;
-    private bool firstMove = true;
-    private float sensitivity = 0.005f;
-    private float pitch_clamp = MathHelper.DegreesToRadians(89.0f);
-    public void Execute(Scene scene, float dt, KeyboardState keyboard, MouseState mouse, Vector2 windowSize, bool isFocused)
-    {
-        if (!isFocused) // check to see if the window is focused
-        {
-            return;
-        }
-
-        KeyboardState input = keyboard;
-
-        if (input.IsKeyDown(Keys.W))
-        {
-            scene.camera.position += scene.camera.Forward * move_speed; //Forward 
-        }
-
-        if (input.IsKeyDown(Keys.S))
-        {
-            scene.camera.position -= scene.camera.Forward * move_speed; //Backwards
-        }
-
-        if (input.IsKeyDown(Keys.A))
-        {
-            scene.camera.position -= Vector3.Normalize(Vector3.Cross(scene.camera.Forward, scene.camera.Up)) * move_speed; //Left
-        }
-
-        if (input.IsKeyDown(Keys.D))
-        {
-            scene.camera.position += Vector3.Normalize(Vector3.Cross(scene.camera.Forward, scene.camera.Up)) * move_speed; //Right
-        }
-
-        if (input.IsKeyDown(Keys.Space))
-        {
-            scene.camera.position += scene.camera.Up * move_speed; //Up 
-        }
-
-        if (input.IsKeyDown(Keys.LeftShift))
-        {
-            scene.camera.position -= scene.camera.Up * move_speed; //Down
-        }
-
-        if (firstMove)
-        {
-            lastMouse = mouse.Position;
-            firstMove = false;
-        }
-
-        var delta = mouse.Position - lastMouse;
-        lastMouse = mouse.Position;
-
-        float yawDelta = -delta.X * sensitivity;
-        float pitchDelta = -delta.Y * sensitivity;
-
-        scene.camera.yaw += yawDelta;
-        scene.camera.pitch = MathHelper.Clamp(scene.camera.pitch + pitchDelta, -pitch_clamp, pitch_clamp);
-
-    }
-}
-
-public class MovementLogic : SceneUpdateLogic
-{
-    public void Execute(Entity entity, float dt)
-    {
-        var m = entity.Movement;
-        if (m == null)
-            return;
-
-        m.velocity += m.acceleration * dt;
-        entity.transform.translation += m.velocity * dt;
-
-        m.angularVelocity += m.angularAcceleration * dt;
-
-        var angVel = m.angularVelocity;
-
-        if (angVel.LengthSquared > 0.0001f)
-        {
-            float angle = angVel.Length * dt; // radians
-            var axis = Vector3.Normalize(angVel);
-
-            var deltaRotation = Quaternion.FromAxisAngle(axis, angle);
-
-            entity.transform.rotation =
-                Quaternion.Normalize(deltaRotation * entity.transform.rotation);
-        }
+        //Console.Out.WriteLine($"Camera position: {scene.camera.position}");
     }
 }
 
@@ -134,80 +31,25 @@ public class Program
     static void Main()
     {
         using var window = new KinetraWindow();
-        float[] _vertices = {
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-        };
-
-        uint[] _indices =
-        {
-            0, 1, 2,
-            0, 2, 3
-            
-        };
-
-        var mesh = new Mesh(_vertices, _indices);
-        mesh.layout.AddAttribute(0, 3); // position
-        mesh.layout.AddAttribute(1, 2); // texture coordinates
-
-        var material = new Material("projected", "textures/d81debc8293134b05d4a940918e22505.jpg");
-        var entity = new Entity(mesh, material);
+        var plane = new Plane(new Vector2(10.0f, 10.0f), new Vector3(0.5f, 0.5f, 0.5f));
+        var point = new Point(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(1.0f, 0.0f, 0.0f));
+        point.Movement = new MovementComponent();
 
         Camera camera = new Camera();
         window.Scene.camera = camera;
-        camera.position = new Vector3(0.0f, 0.0f, 3.0f);
+        camera.position = new Vector3(0.0f, 1.0f, 3.0f);
 
-        entity.Movement = new MovementComponent();
-        // entity.Movement.angularVelocity = new Vector3(0.0f, 1.0f, 0.0f);
-        //entity.Movement.velocity = new Vector3(0.0f, 0.0f, -1.0f);
-
-        window.Scene.Add(entity);
+        window.Scene.Add(plane);
+        window.Scene.Add(point);
         
         window.FrameUpdatePasses.Add(new CameraLogic());
+        window.FrameUpdatePasses.Add(new InputMovementSystem());
         window.FrameUpdatePasses.Add(new Newframe());
 
 
         window.Scene.passes.Add(new MovementLogic());
-
+        
         window.AddRenderPass(new RenderLogic());
 
 

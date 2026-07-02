@@ -18,6 +18,7 @@ namespace Kinetra.Core
         public MeshBuffer buffer = new MeshBuffer(mesh);
         public Transform transform = new();
         public MovementComponent? Movement;
+        public PrimitiveType renderMode = PrimitiveType.Triangles;
 
         public void Dispose()
         {
