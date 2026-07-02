@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("kinetra")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b814a776aa70a6046fde396455f040e273dbf697")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f23a889a748392cb9da6fb7486ee1371e8769e68")]
 [assembly: System.Reflection.AssemblyProductAttribute("kinetra")]
 [assembly: System.Reflection.AssemblyTitleAttribute("kinetra")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

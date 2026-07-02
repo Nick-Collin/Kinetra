@@ -2,12 +2,18 @@ using Kinetra.Core;
 
 namespace Kinetra.Render
 {
+    public interface FrameUpdateLogic
+    {
+        void Execute(Scene scene, float dt, KeyboardState keyboard, MouseState mouse, Vector2 windowSize, bool isFocused);
+    }
+
     public class KinetraWindow : GameWindow
     {
         private Vector4 clearColor = new Vector4(0.0f, 0.0f, 0.0f, 0.0f);
 
         private Renderer renderer = new();
-        public Scene scene = new();
+        public List<FrameUpdateLogic> FrameUpdatePasses = new();
+        public Scene Scene = new(); 
 
         public void SetBgColor(float r, float g, float b, float a)
         {
@@ -28,7 +34,10 @@ namespace Kinetra.Render
             {
                 Close();
             }
-            scene.Update();
+            foreach (FrameUpdateLogic pass in FrameUpdatePasses)
+            {
+                pass.Execute(Scene, (float)e.Time, KeyboardState, MouseState, new Vector2(Size.X, Size.Y), IsFocused);
+            }
         }
 
         protected override void OnLoad() // First time opening the window
@@ -41,7 +50,7 @@ namespace Kinetra.Render
         {
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            renderer.Draw(scene);
+            renderer.Execute(Scene);
             SwapBuffers();
         }
         
@@ -54,7 +63,12 @@ namespace Kinetra.Render
         protected override void OnUnload() // When closing the window
         {
             base.OnUnload();
-            scene.Dispose();
+            Scene.Dispose();
+        }
+
+        public void AddRenderPass(IRenderPass pass)
+        {
+            renderer.SetRenderPass(pass);
         }
         
     }

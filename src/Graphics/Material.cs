@@ -24,7 +24,9 @@ namespace Kinetra.Graphics
             {
                 GL.ActiveTexture(TextureUnit.Texture0);
                 texture.Use();
+                shader?.SetInt("uTexture", 0);
             }
+            
         }
 
         public void LoadShader(string shaderName)
