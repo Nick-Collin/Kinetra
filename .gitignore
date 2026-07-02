@@ -1,6 +1,8 @@
 bin/ 
 bin/*
 obj/ 
+objects/
+objects/*
 obj/*
 *.log
 *.tmp
@@ -8,3 +10,4 @@ obj/*
 *.swp
 *.swo
 *.exe 
+*.obj

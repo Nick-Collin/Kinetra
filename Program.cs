@@ -1,36 +1,61 @@
 ﻿using Kinetra.Render;
 using Kinetra.Core;
 using Kinetra.Graphics;
+using Kinetra.Defaults;
+
+public class InputMovementSystem : FrameUpdateLogic
+{
+    public void Execute(Scene scene, float dt, KeyboardState keyboard, MouseState mouse, Vector2 windowSize, bool isFocused)
+    {
+        foreach (var entity in scene.Entities)
+        {
+            if (entity is Point p){
+                if (keyboard.IsKeyDown(Keys.Up))
+                    p.transform.translation += new Vector3(0f, 0.1f, 0f) * dt;
+
+                if (keyboard.IsKeyDown(Keys.Down))
+                    p.transform.translation += new Vector3(0f, -0.1f, 0f) * dt;
+
+                //Console.Out.WriteLine($"Point position: {p.transform.translation}");
+            }
+            if (entity is Plane pl){
+                //Console.Out.WriteLine($"Plane position: {pl.transform.translation}");
+            }
+        }
+        //Console.Out.WriteLine($"Camera position: {scene.camera.position}");
+    }
+}
 
 public class Program
 {
     static void Main()
     {
         using var window = new KinetraWindow();
-        float[] _vertices =
-        {
-            //Position          Texture coordinates
-            0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
-            0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-            -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left
-        };
 
-        uint[] _indices =
-        {
-            0, 1, 2,
-            0, 2, 3
-        };
+        var plane = new Plane(new Vector2(10.0f, 10.0f), new Vector3(0.5f, 0.5f, 0.5f));
+        var point = new Point(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(1.0f, 0.0f, 0.0f));
+        point.Movement = new MovementComponent();
 
-        var mesh = new Mesh(_vertices, _indices);
-        mesh.layout.AddAttribute(0, 3); // position
-        mesh.layout.AddAttribute(1, 2); // texture coordinates
+        Camera camera = new Camera();
+        window.Scene.camera = camera;
+        camera.position = new Vector3(0.0f, 1.0f, 3.0f);
 
-        var material = new Material("textured", "textures/d81debc8293134b05d4a940918e22505.jpg");
-        var entity = new Entity(mesh, material);
+        window.Scene.Add(plane);
+        window.Scene.Add(point);
+        
+        window.FrameUpdatePasses.Add(new CameraLogic());
+        window.FrameUpdatePasses.Add(new InputMovementSystem());
+        window.FrameUpdatePasses.Add(new Newframe());
 
-        window.scene.Add(entity);
 
+        window.Scene.passes.Add(new MovementLogic());
+        
+        window.AddRenderPass(new RenderLogic());
+
+
+        window.WindowBorder = WindowBorder.Hidden;
+        window.WindowState = WindowState.Fullscreen;
+        window.CursorState = CursorState.Grabbed;
         window.Run();
     }
 }

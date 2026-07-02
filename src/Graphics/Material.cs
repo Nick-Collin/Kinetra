@@ -5,26 +5,16 @@ namespace Kinetra.Graphics
     public class Material
     {
         public Shader? shader;
-        public Texture? texture;
         private readonly string shaders_path = "shaders\\";
 
-        public Material(string shaderName = "default", string? texturePath = null)
+        public Material(string shaderName = "default")
         {
             LoadShader(shaderName);
-
-            if (texturePath != null)
-                texture = new Texture(texturePath);
         }
 
-        public void Use()
+        public virtual void Use()
         {
             shader?.Use();
-
-            if (texture != null)
-            {
-                GL.ActiveTexture(TextureUnit.Texture0);
-                texture.Use();
-            }
         }
 
         public void LoadShader(string shaderName)
@@ -49,4 +39,61 @@ namespace Kinetra.Graphics
             shader?.Dispose();
         }
     }
+
+        public class PointMaterial : Material
+        {
+            public Vector3 color;
+            public float radius;
+
+            public PointMaterial(Vector3 color, float radius, string shaderName = "point")
+                : base(shaderName)
+            {
+                this.color = color;
+                this.radius = radius;
+            }
+
+            public override void Use()
+            {
+                base.Use();
+                shader?.SetVector3("uColor", color);
+                shader?.SetFloat("uPointSize", radius);
+            }
+        }
+
+    public class SingleColoredMaterial : Material
+    {
+        public Vector3 color;
+
+        public SingleColoredMaterial(Vector3 color, string shaderName = "colored")
+            : base(shaderName)
+        {
+            this.color = color;
+        }
+
+        public override void Use()
+        {
+            base.Use();
+            shader?.SetVector3("uColor", color);
+        }
+    }
+
+    public class TexturedMaterial : Material
+    {
+        public Texture texture;
+
+        public TexturedMaterial(Texture texture, string shaderName = "textured")
+            : base(shaderName)
+        {
+            this.texture = texture;
+        }
+
+        public override void Use()
+        {
+            base.Use();
+                GL.ActiveTexture(TextureUnit.Texture0);
+                texture.Use();
+                shader?.SetInt("uTexture", 0);
+        }
+    }
+
 }

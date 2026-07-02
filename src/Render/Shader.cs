@@ -72,6 +72,30 @@ namespace Kinetra.Render
             }
         }
 
+        public void SetInt(string name, int value)
+        {
+            int location = GL.GetUniformLocation(Handle, name);
+            GL.Uniform1(location, value);
+        }
+
+        public void SetMatrix4(string name, Matrix4 value)
+        {
+            int location = GL.GetUniformLocation(Handle, name);
+            GL.UniformMatrix4(location, false, ref value);
+        } 
+
+        public void SetVector3(string name, Vector3 value)
+        {
+            int location = GL.GetUniformLocation(Handle, name);
+            GL.Uniform3(location, value);
+        }
+
+        public void SetFloat(string name, float value)
+        {
+            int location = GL.GetUniformLocation(Handle, name);
+            GL.Uniform1(location, value);
+        }
+
         ~Shader()
         {
             if (disposedValue == false)
