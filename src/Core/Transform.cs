@@ -3,13 +3,14 @@ namespace Kinetra.Core
     public class Transform
     {
         public Vector3 translation;
-        public Vector3 rotation;
+        public Quaternion rotation;
+    
         public Vector3 scale;
 
         public Transform()
         {
             translation = Vector3.Zero;
-            rotation = Vector3.Zero;
+            rotation = Quaternion.Identity;
             scale = Vector3.One;
         }
 
@@ -17,15 +18,22 @@ namespace Kinetra.Core
         {
             var t = Matrix4.CreateTranslation(translation);
 
-            var rx = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rotation.X));
-            var ry = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rotation.Y));
-            var rz = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rotation.Z));
-
-            var r = rz * ry * rx;
+            var r = Matrix4.CreateFromQuaternion(rotation);
 
             var s = Matrix4.CreateScale(scale);
 
             return t * r * s;
+        }
+
+        public void SetEuler(Vector3 eulerDegrees)
+{
+            var radians = new Vector3(
+                MathHelper.DegreesToRadians(eulerDegrees.X),
+                MathHelper.DegreesToRadians(eulerDegrees.Y),
+                MathHelper.DegreesToRadians(eulerDegrees.Z)
+            );
+
+            rotation = Quaternion.FromEulerAngles(radians);
         }
     }
 }

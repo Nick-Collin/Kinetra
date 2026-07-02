@@ -39,7 +39,10 @@ public class Newframe : FrameUpdateLogic
 
 public class CameraLogic : FrameUpdateLogic
 {
-    private float speed = 0.0005f;
+    private float move_speed = 0.0005f;
+    private Vector2 lastMouse;
+    private bool firstMove = true;
+    private float sensitivity = 0.005f;
     public void Execute(Scene scene, float dt, KeyboardState keyboard, MouseState mouse, Vector2 windowSize, bool isFocused)
     {
         if (!isFocused) // check to see if the window is focused
@@ -51,33 +54,56 @@ public class CameraLogic : FrameUpdateLogic
 
         if (input.IsKeyDown(Keys.W))
         {
-            scene.camera.position += scene.camera.Forward * speed; //Forward 
+            scene.camera.position += scene.camera.Forward * move_speed; //Forward 
         }
 
         if (input.IsKeyDown(Keys.S))
         {
-            scene.camera.position -= scene.camera.Forward * speed; //Backwards
+            scene.camera.position -= scene.camera.Forward * move_speed; //Backwards
         }
 
         if (input.IsKeyDown(Keys.A))
         {
-            scene.camera.position -= Vector3.Normalize(Vector3.Cross(scene.camera.Forward, scene.camera.Up)) * speed; //Left
+            scene.camera.position -= Vector3.Normalize(Vector3.Cross(scene.camera.Forward, scene.camera.Up)) * move_speed; //Left
         }
 
         if (input.IsKeyDown(Keys.D))
         {
-            scene.camera.position += Vector3.Normalize(Vector3.Cross(scene.camera.Forward, scene.camera.Up)) * speed; //Right
+            scene.camera.position += Vector3.Normalize(Vector3.Cross(scene.camera.Forward, scene.camera.Up)) * move_speed; //Right
         }
 
         if (input.IsKeyDown(Keys.Space))
         {
-            scene.camera.position += scene.camera.Up * speed; //Up 
+            scene.camera.position += scene.camera.Up * move_speed; //Up 
         }
 
         if (input.IsKeyDown(Keys.LeftShift))
         {
-            scene.camera.position -= scene.camera.Up * speed; //Down
+            scene.camera.position -= scene.camera.Up * move_speed; //Down
         }
+
+        if (firstMove)
+        {
+            lastMouse = mouse.Position;
+            firstMove = false;
+        }
+
+        var delta = mouse.Position - lastMouse;
+        lastMouse = mouse.Position;
+
+        float yawDelta = -delta.X * sensitivity;
+        float pitchDelta = -delta.Y * sensitivity;
+
+        var yawRot = Quaternion.FromAxisAngle(Vector3.UnitY, yawDelta);
+        var right = scene.camera.Right;
+
+        var pitchRot = Quaternion.FromAxisAngle(right, pitchDelta);
+
+        // aplica incrementalmente
+        scene.camera.rotation = Quaternion.Normalize(
+            pitchRot * yawRot * scene.camera.rotation
+        );
+
     }
 }
 
@@ -93,7 +119,19 @@ public class MovementLogic : SceneUpdateLogic
         entity.transform.translation += m.velocity * dt;
 
         m.angularVelocity += m.angularAcceleration * dt;
-        entity.transform.rotation += m.angularVelocity * dt;
+
+        var angVel = m.angularVelocity;
+
+        if (angVel.LengthSquared > 0.0001f)
+        {
+            float angle = angVel.Length * dt; // radians
+            var axis = Vector3.Normalize(angVel);
+
+            var deltaRotation = Quaternion.FromAxisAngle(axis, angle);
+
+            entity.transform.rotation =
+                Quaternion.Normalize(deltaRotation * entity.transform.rotation);
+        }
     }
 }
 
@@ -165,7 +203,7 @@ public class Program
         camera.position = new Vector3(0.0f, 0.0f, 3.0f);
 
         entity.Movement = new MovementComponent();
-        entity.Movement.angularVelocity = new Vector3(20.0f, 20.0f, 20.0f);
+        // entity.Movement.angularVelocity = new Vector3(0.0f, 1.0f, 0.0f);
         //entity.Movement.velocity = new Vector3(0.0f, 0.0f, -1.0f);
 
         window.Scene.Add(entity);
@@ -173,10 +211,15 @@ public class Program
         window.FrameUpdatePasses.Add(new CameraLogic());
         window.FrameUpdatePasses.Add(new Newframe());
 
+
         window.Scene.passes.Add(new MovementLogic());
 
         window.AddRenderPass(new RenderLogic());
 
+
+        window.WindowBorder = WindowBorder.Hidden;
+        window.WindowState = WindowState.Fullscreen;
+        window.CursorState = CursorState.Grabbed;
         window.Run();
     }
 }

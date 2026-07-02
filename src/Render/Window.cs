@@ -14,6 +14,7 @@ namespace Kinetra.Render
         private Renderer renderer = new();
         public List<FrameUpdateLogic> FrameUpdatePasses = new();
         public Scene Scene = new(); 
+        
 
         public void SetBgColor(float r, float g, float b, float a)
         {
