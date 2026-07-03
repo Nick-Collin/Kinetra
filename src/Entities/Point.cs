@@ -1,6 +1,6 @@
 using Kinetra.Graphics;
 
-namespace Kinetra.Core
+namespace Kinetra.Entities
 {
     public class Point : Entity
     {

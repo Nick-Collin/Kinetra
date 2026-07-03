@@ -1,4 +1,5 @@
 using Kinetra.Core;
+using Kinetra.Entities;
 
 namespace Kinetra.Defaults
 {

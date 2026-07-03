@@ -1,3 +1,5 @@
+using Kinetra.Entities;
+
 namespace Kinetra.Core
 {
 

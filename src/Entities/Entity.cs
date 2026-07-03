@@ -1,7 +1,7 @@
 using Kinetra.Graphics;
-using Kinetra.Render;
+using Kinetra.Core;
 
-namespace Kinetra.Core
+namespace Kinetra.Entities
 {
     public class MovementComponent
     {

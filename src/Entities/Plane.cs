@@ -1,7 +1,6 @@
-using System.Drawing;
 using Kinetra.Graphics;
 
-namespace Kinetra.Core
+namespace Kinetra.Entities
 {
     public class Plane : Entity
     {

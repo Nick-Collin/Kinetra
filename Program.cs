@@ -1,30 +1,7 @@
 ﻿using Kinetra.Render;
 using Kinetra.Core;
-using Kinetra.Graphics;
+using Kinetra.Physics;
 using Kinetra.Defaults;
-
-public class InputMovementSystem : FrameUpdateLogic
-{
-    public void Execute(Scene scene, float dt, KeyboardState keyboard, MouseState mouse, Vector2 windowSize, bool isFocused)
-    {
-        foreach (var entity in scene.Entities)
-        {
-            if (entity is Point p){
-                if (keyboard.IsKeyDown(Keys.Up))
-                    p.transform.translation += new Vector3(0f, 0.1f, 0f) * dt;
-
-                if (keyboard.IsKeyDown(Keys.Down))
-                    p.transform.translation += new Vector3(0f, -0.1f, 0f) * dt;
-
-                //Console.Out.WriteLine($"Point position: {p.transform.translation}");
-            }
-            if (entity is Plane pl){
-                //Console.Out.WriteLine($"Plane position: {pl.transform.translation}");
-            }
-        }
-        //Console.Out.WriteLine($"Camera position: {scene.camera.position}");
-    }
-}
 
 public class Program
 {
@@ -32,24 +9,76 @@ public class Program
     {
         using var window = new KinetraWindow();
 
-        var plane = new Plane(new Vector2(10.0f, 10.0f), new Vector3(0.5f, 0.5f, 0.5f));
-        var point = new Point(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(1.0f, 0.0f, 0.0f));
-        point.Movement = new MovementComponent();
-
         Camera camera = new Camera();
         window.Scene.camera = camera;
-        camera.position = new Vector3(0.0f, 1.0f, 3.0f);
+        camera.position = new Vector3(0.0f, 0.0f, 2.0f);
 
-        window.Scene.Add(plane);
-        window.Scene.Add(point);
+        var container = new BoxContainer(
+            new Vector3(-5, -5, -5),
+            new Vector3(5, 5, 5)
+        );
+
+        window.Scene.Add(container);
+        /*
+        var hidrogen1 = new Atom((0f,1.0f,0f), (1f,0f,0f), 50);
+        hidrogen1.protons = 1; hidrogen1.neutrons = 1; hidrogen1.eletrons = 1;
+        var hidrogen2 = new Atom((0f,-1.0f,0f), (1f,0f,0f), 50);
+        hidrogen2.protons = 1; hidrogen2.neutrons = 1; hidrogen2.eletrons = 1;
+        var hidrogen3 = new Atom((1f,0.0f,0f), (1f,0f,0f), 50);
+        hidrogen3.protons = 1; hidrogen3.neutrons = 1; hidrogen3.eletrons = 1;
+        var hidrogen4 = new Atom((-1f,0.0f,0f), (1f,0f,0f), 50);
+        hidrogen4.protons = 1; hidrogen4.neutrons = 1; hidrogen4.eletrons = 1;
         
+        var eletron = new Atom((0f,0.0f,0f), (0f,0f,1f), 20);
+        eletron.eletrons = 1;
+
+        window.Scene.Add(hidrogen1); 
+        window.Scene.Add(hidrogen2);
+        window.Scene.Add(hidrogen3);
+        window.Scene.Add(hidrogen4);
+        */
+
+        var rnd = new Random();
+
+        Atom Make(float x, float y, float z)
+        {
+            var a = new Atom(
+                new Vector3(x, y, z),
+                new Vector3(1f, 0.5f, 0.2f),
+                50
+            );
+
+            a.protons = 1;
+            a.neutrons = 1;
+            a.eletrons = 1;
+
+            a.velocity = new Vector3(
+                Random.Shared.NextSingle() - 0.5f,
+                Random.Shared.NextSingle() - 0.5f,
+                Random.Shared.NextSingle() - 0.5f
+            ) * 2f;
+
+            return a;
+        }
+
+        for (int i = 0; i < 20; i++)
+        {
+            float x = (float)(rnd.NextDouble() * 4 - 2);
+            float y = (float)(rnd.NextDouble() * 4 - 2);
+            float z = (float)(rnd.NextDouble() * 4 - 2);
+
+            window.Scene.Add(Make(x, y, z));
+        }
+
+
+        var sim = new AtomSimulation();
+        sim.container = container;
+        window.FrameUpdatePasses.Add(sim);
+
+
         window.FrameUpdatePasses.Add(new CameraLogic());
-        window.FrameUpdatePasses.Add(new InputMovementSystem());
         window.FrameUpdatePasses.Add(new Newframe());
-
-
         window.Scene.passes.Add(new MovementLogic());
-        
         window.AddRenderPass(new RenderLogic());
 
 
