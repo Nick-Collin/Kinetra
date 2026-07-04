@@ -2,6 +2,7 @@
 using Kinetra.Core;
 using Kinetra.Physics;
 using Kinetra.Defaults;
+using System.Security.Cryptography;
 
 public class Program
 {
@@ -19,25 +20,19 @@ public class Program
         );
 
         window.Scene.Add(container);
-        /*
-        var hidrogen1 = new Atom((0f,1.0f,0f), (1f,0f,0f), 50);
-        hidrogen1.protons = 1; hidrogen1.neutrons = 1; hidrogen1.eletrons = 1;
-        var hidrogen2 = new Atom((0f,-1.0f,0f), (1f,0f,0f), 50);
-        hidrogen2.protons = 1; hidrogen2.neutrons = 1; hidrogen2.eletrons = 1;
-        var hidrogen3 = new Atom((1f,0.0f,0f), (1f,0f,0f), 50);
-        hidrogen3.protons = 1; hidrogen3.neutrons = 1; hidrogen3.eletrons = 1;
-        var hidrogen4 = new Atom((-1f,0.0f,0f), (1f,0f,0f), 50);
-        hidrogen4.protons = 1; hidrogen4.neutrons = 1; hidrogen4.eletrons = 1;
         
-        var eletron = new Atom((0f,0.0f,0f), (0f,0f,1f), 20);
-        eletron.eletrons = 1;
+        var h1 = new Atom((1.0f,0.0f,0.0f), (1.0f,0.0f,0.0f), 1, 1, 1); 
+        var h2 = new Atom((-1.0f,0.0f,0.0f), (1.0f,0.0f,0.0f), 1, 0, 1); 
+        var h3 = new Atom((0.0f,1.0f,0.0f), (1.0f,0.0f,0.0f), 1, 1, 1); 
+        var h4 = new Atom((0.0f,-1.0f,0.0f), (1.0f,0.0f,0.0f), 1, 0, 1); 
 
-        window.Scene.Add(hidrogen1); 
-        window.Scene.Add(hidrogen2);
-        window.Scene.Add(hidrogen3);
-        window.Scene.Add(hidrogen4);
-        */
+        window.Scene.Add(h1); 
+        window.Scene.Add(h2);
+        window.Scene.Add(h3);
+        window.Scene.Add(h4);
+        
 
+        /*
         var rnd = new Random();
 
         Atom Make(float x, float y, float z)
@@ -45,12 +40,10 @@ public class Program
             var a = new Atom(
                 new Vector3(x, y, z),
                 new Vector3(1f, 0.5f, 0.2f),
-                50
+                1,
+                1,
+                1
             );
-
-            a.protons = 1;
-            a.neutrons = 1;
-            a.eletrons = 1;
 
             a.velocity = new Vector3(
                 Random.Shared.NextSingle() - 0.5f,
@@ -69,7 +62,7 @@ public class Program
 
             window.Scene.Add(Make(x, y, z));
         }
-
+        */
 
         var sim = new AtomSimulation();
         sim.container = container;
