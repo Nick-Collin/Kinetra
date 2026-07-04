@@ -15,11 +15,11 @@ public class Program
         camera.position = new Vector3(0.0f, 0.0f, 2.0f);
 
         var container = new BoxContainer(
-            new Vector3(-5, -5, -5),
-            new Vector3(5, 5, 5)
+            new Vector3(-10, -10, -10),
+            new Vector3(10, 10, 10)
         );
 
-        //window.Scene.Add(container);
+        window.Scene.Add(container);
 
         // Atoms
         //var c = new Atom((0.0f,2.0f,0.0f), (0.0f,1.0f,0.0f), 6, 6, 7);
@@ -27,15 +27,24 @@ public class Program
         //OrbitalVisualizer.BuildOrbitalsEntities(c, (0f,0f,1f), 0.05f, window);
         //window.Scene.Add(c);
 
-        var h = new Atom((0.0f,-1.0f,0.0f), (1.0f,1.0f,1.0f), 1, 1, 1);
-        OrbitalVisualizer.BuildElectronEntities(h, (1f,0f,0f), window);
-        OrbitalVisualizer.BuildOrbitalsEntities(h, (0f,0f,1f), 0.05f, window);
+        /*
+        var h = new Atom((0.0f,-1.0f,0.0f), (1.0f,1.0f,1.0f), 2, 2, 0);
+        h.velocity = (-1.0f, 0f, 0f);
         window.Scene.Add(h);
 
         var h2 = new Atom((0.0f,1.0f,0.0f), (1.0f,1.0f,1.0f), 1, 1, 0);
-        OrbitalVisualizer.BuildElectronEntities(h2, (1f,0f,0f), window);
-        OrbitalVisualizer.BuildOrbitalsEntities(h2, (0f,0f,1f), 0.05f, window);
+        h2.velocity = (0.0f, 0f, 0f);
         window.Scene.Add(h2);
+
+        var e1 = new Atom((0.0f,0.0f,-1.0f), (1.0f,1.0f,0.0f), 0, 0, 1);
+        e1.velocity = (0.0f, 0.0f, 0.0f);
+        window.Scene.Add(e1);
+        
+        var e2 = new Atom((0.0f,0.0f,1.0f), (1.0f,1.0f,0.0f), 0, 0, 1);
+        e2.velocity = (0.0f, 0.0f, 0.0f);
+        window.Scene.Add(e2);
+
+        
 
         var sim = new AtomSimulation();
         sim.container = container;
@@ -45,6 +54,17 @@ public class Program
         window.FrameUpdatePasses.Add(new CameraLogic());
         window.FrameUpdatePasses.Add(new Newframe());
         //window.Scene.passes.Add(new MovementLogic());
+        window.AddRenderPass(new RenderLogic());
+        */
+        var sim = new AtomSimulation();
+        sim.container = container;
+        window.FrameUpdatePasses.Add(sim);
+
+        WorldGenerator.GenerateNuclei(window.Scene, container, 10);
+        WorldGenerator.GenerateFreeElectrons(window.Scene, container, 40);
+
+        window.FrameUpdatePasses.Add(new CameraLogic());
+        window.FrameUpdatePasses.Add(new Newframe());
         window.AddRenderPass(new RenderLogic());
 
 

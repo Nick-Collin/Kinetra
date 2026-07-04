@@ -10,6 +10,7 @@ namespace Kinetra.Physics
     public class OrbitalVisualizer
     {
         private const float scale_factor = 1.0f;
+        static Random rng = new Random();
         private class UpdateElectronPos : SceneUpdateLogic
         {
             public void Execute(Entity entity, float dt)
@@ -19,7 +20,7 @@ namespace Kinetra.Physics
                     var orb = ev.atom.GetOrbital(ev.electron);
 
                     ev.transform.translation =
-                        ev.atom.position + SamplePosition(ev.electron, orb, ev.atom);
+                        ev.atom.position + SamplePosition(ev.electron, orb, ev.atom) * UnitMaster.VISUAL_SCALER;;
                 }
 
                 if (entity is OrbitalView ov)
@@ -54,6 +55,14 @@ namespace Kinetra.Physics
             }
         }
 
+        static float GetOrbitalRadius(Atom atom, int n)
+        {
+            float Z = MathF.Max(atom.p, 1); // avoid div by zero
+            float r_meters =  UnitMaster.BOHR_R_SCALED * (n * n) / Z;
+
+            return UnitMaster.MetersToUnit(r_meters);
+        }
+
         public static List<Entity> BuildElectronEntities(Atom atom, Vector3 color, KinetraWindow w)
         {
             var list = new List<Entity>();
@@ -81,28 +90,14 @@ namespace Kinetra.Physics
 
         static Vector3 SamplePosition(Electron e, Orbital orb, Atom atom)
         {
-            float r = UnitMaster.MetersToUnit(atom.GetAtomicRadius() * (float)e.n * (float)e.n);
+            float r = GetOrbitalRadius(atom, e.n);
 
-            var dir = RandomUnitVector();
+            var dir = Orbital.RandomUnitVector();
 
             var axis = GetPDirection(orb.index);
-            var ran = new Random();
-            dir = Vector3.Normalize(dir + axis * (float)ran.NextDouble());
+            dir = Vector3.Normalize(dir + axis * (float)rng.NextDouble());
 
             return dir * r;
-        }
-
-        static Vector3 RandomUnitVector()
-        {
-            float z = Random.Shared.NextSingle() * 2f - 1f;
-            float t = Random.Shared.NextSingle() * MathF.PI * 2f;
-            float r = MathF.Sqrt(1 - z * z);
-
-            return new Vector3(
-                r * MathF.Cos(t),
-                r * MathF.Sin(t),
-                z
-            );
         }
 
         static Vector3 GetPDirection(int index)
@@ -136,7 +131,7 @@ namespace Kinetra.Physics
 
         public static Entity BuildOrbital(Orbital orb, Vector3 color, float alpha)
         {
-            float r = UnitMaster.MetersToUnit(orb.atom.GetAtomicRadius() * (float)orb.n * (float)orb.n);
+            float r = GetOrbitalRadius(orb.atom, orb.n) * UnitMaster.VISUAL_SCALER;
 
             Mesh mesh;
 

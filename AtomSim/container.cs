@@ -1,8 +1,8 @@
 using Kinetra.Entities;
 using Kinetra.Graphics;
 
-//TODO move mesh criation to MeshFactoy
-
+namespace Kinetra.Physics
+{
 public class BoxContainer : Entity
 {
     public BoxContainer(Vector3 min, Vector3 max)
@@ -70,22 +70,6 @@ public class BoxContainer : Entity
         this.mesh = CreateMesh(min, max);
     }
 
-    public Vector3 Apply(Vector3 pos, Vector3 vel)
-    {
-        Vector3 force = Vector3.Zero;
-
-        if (pos.X < min.X) force.X += (min.X - pos.X) * stiffness;
-        if (pos.X > max.X) force.X += (max.X - pos.X) * stiffness;
-
-        if (pos.Y < min.Y) force.Y += (min.Y - pos.Y) * stiffness;
-        if (pos.Y > max.Y) force.Y += (max.Y - pos.Y) * stiffness;
-
-        if (pos.Z < min.Z) force.Z += (min.Z - pos.Z) * stiffness;
-        if (pos.Z > max.Z) force.Z += (max.Z - pos.Z) * stiffness;
-
-        return force;
-    }
-
     public void ResolveCollision(ref Vector3 pos, ref Vector3 vel)
     {
         float restitution = 0.8f;
@@ -93,34 +77,37 @@ public class BoxContainer : Entity
         if (pos.X < min.X)
         {
             pos.X = min.X;
-            vel.X = MathF.Abs(vel.X) * restitution;
+            if (vel.X < 0) vel.X = -vel.X * restitution;
         }
         else if (pos.X > max.X)
         {
             pos.X = max.X;
-            vel.X = -MathF.Abs(vel.X) * restitution;
+            if (vel.X > 0) vel.X = -vel.X * restitution;
         }
 
         if (pos.Y < min.Y)
         {
             pos.Y = min.Y;
-            vel.Y = MathF.Abs(vel.Y) * restitution;
+            if (vel.Y < 0) vel.Y = -vel.Y * restitution;
         }
         else if (pos.Y > max.Y)
         {
             pos.Y = max.Y;
-            vel.Y = -MathF.Abs(vel.Y) * restitution;
+            if (vel.Y > 0) vel.Y = -vel.Y * restitution;
         }
+
 
         if (pos.Z < min.Z)
         {
             pos.Z = min.Z;
-            vel.Z = MathF.Abs(vel.Z) * restitution;
+            if (vel.Z < 0) vel.Z = -vel.Z * restitution;
         }
         else if (pos.Z > max.Z)
         {
             pos.Z = max.Z;
-            vel.Z = -MathF.Abs(vel.Z) * restitution;
+            if (vel.Z > 0) vel.Z = -vel.Z * restitution;
         }
+
     }
+}
 }

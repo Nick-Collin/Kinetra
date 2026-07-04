@@ -13,20 +13,20 @@ public class Atom : Point
         public int p;
         public int n;
         public List<Electron> Electrons = new();
-        public float charge => p - Electrons.Count;
+        public float charge => (p - Electrons.Count) * UnitMaster.E_CHARGE_SCALED;
 
         public Vector3 velocity;
         public Vector3 force;
 
         public Vector3 position => this.transform.translation;
         public Vector3 prevPosition;
-        public float mass => 
-            p * UnitMaster.PROTON_MASS +
-            n * UnitMaster.NEUTRON_MASS +
-            Electrons.Count * UnitMaster.ELECTRON_MASS;
+        public float mass =>
+            p * UnitMaster.P_MASS_SCALED +
+            n * UnitMaster.N_MASS_SCALED +
+            Electrons.Count * UnitMaster.E_MASS_SCALED;
         
-        protected float radius;
-        public float sigma => 2 * GetAtomicRadius(); // In Units
+        public float radius;
+        public float sigma; 
 
         public Atom(Vector3 position, Vector3 color, int p, int n, int e)
             : base(position, color)
@@ -37,6 +37,7 @@ public class Atom : Point
             this.InitializeOrbitals();
             this.DistributeElectrons(e);
             this.ComputeNucleusRadius();
+            this.ComputeSigma();
 
 
             this.velocity = Vector3.Zero;
@@ -141,12 +142,12 @@ public class Atom : Point
             }
         }
 
-        public void ComputeNucleusRadius()
+        public void ComputeNucleusRadius() // In Units
         {
             int A = p + n;
-            float R0 = UnitMaster.MetersToUnit(1.2e-15f); // meters
+            float R0 = 1.2e-15f; 
 
-            this.radius = R0 * MathF.Pow(A, 1.0f / 3.0f);
+            this.radius = UnitMaster.MetersToUnit(R0 * MathF.Pow(A, 1.0f / 3.0f));
         }
 
         private void AddSubshell(int n, char subshell)
@@ -172,9 +173,9 @@ public class Atom : Point
             );
         }
 
-        public float GetAtomicRadius()
+        public float GetAtomicRadius() 
         {
-            float a0 = UnitMaster.MetersToUnit(5.29e-11f);
+            double a0 = UnitMaster.BOHR_RADIUS;
 
             int n_max = Electrons.Count == 0 ? 1 : Electrons.Max(e => e.n);
 
@@ -188,9 +189,13 @@ public class Atom : Point
 
             Zeff = MathF.Max(Zeff, 1.0f);
 
-            float atomicRadius = a0 * (n_max * n_max) / Zeff;
-            return atomicRadius;
+            float atomicRadius = (float)a0 * (n_max * n_max) / Zeff;
+            return UnitMaster.MetersToUnit(atomicRadius);
+        }
+
+    public void ComputeSigma() 
+        {
+            this.sigma = 2 * GetAtomicRadius(); 
         }
     }
-
 }

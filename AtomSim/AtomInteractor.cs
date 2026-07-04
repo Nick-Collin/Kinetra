@@ -5,62 +5,116 @@ using OpenTK.Graphics.ES11;
 
 namespace Kinetra.Physics
 {
+    public class Bond
+    {
+        public Atom a;
+        public Atom b;
+
+        public Orbital oa;
+        public Orbital ob;
+
+        public float alignment;
+        public float electronSharing;
+        public float baseEnergy;
+
+        public float Strength => alignment * electronSharing * baseEnergy;
+
+        public Bond(Atom a, Atom b, Orbital oa, Orbital ob)
+        {
+            this.a = a;
+            this.b = b;
+            this.oa = oa;
+            this.ob = ob;
+        }
+    }
     public class AtomInteractor
     {
 
         public static Vector3 LennardJonesForce(Atom a, Atom b)
         {
-            var r_vec = a.position - b.position; // world units
-            float r = UnitMaster.UnitsToMeters(r_vec.Length);
-            
-            var dir = Vector3.Normalize(r_vec);
+            var r_vec = b.position - a.position;
+            float r = MathF.Max(r_vec.Length, 1e-6f);
 
-            // Lennard-Jones
-            float sigma = UnitMaster.UnitsToMeters((a.sigma + b.sigma) / 2) * UnitMaster.SIGMA_SCALER;
-            float epsilon = 1e-21f * UnitMaster.EPSILON_SCALER; // TODO Calculate epsilon
+            var dir = r_vec / r;
 
-            float invR = 1.0f / r;
-            float sr = sigma * invR;
-            float sr6 = MathF.Pow(sr, 6);
+            float sigma = a.sigma + b.sigma;
+            //Console.WriteLine($"r = {r_vec}, sd = {sigma}");
+
+            float invR2 = 1.0f / (r*r);
+
+            float sigma2 = sigma * sigma;
+            float sr2 = sigma2 * invR2;
+            float sr6 = sr2 * sr2 * sr2;
             float sr12 = sr6 * sr6;
 
-            float lj = 24 * epsilon * (2 * sr12 - sr6) * invR;
-            Vector3 lennardJones = dir * lj;
+            float epsilon = UnitMaster.ScaleEnergy(1e-24);
 
-            return  UnitMaster.ForceIrlToSystem(lennardJones);
+            float forceMag = 24f * epsilon * (2f * sr12 - sr6) / r;
+            Console.WriteLine(forceMag);
+
+            return dir * forceMag;
         }
-        public static Vector3 EletromagneticForce(Atom a, Atom b)
-        {
-            var r_vec = a.position - b.position; // world units
-            float r = UnitMaster.UnitsToMeters(r_vec.Length);
-            
-            var dir = Vector3.Normalize(r_vec);
-
-            // Coulomb
-            float k = UnitMaster.K;
-            Vector3 coulomb = dir * (k * a.charge * b.charge) / (r*r);
-            return  UnitMaster.ForceIrlToSystem(coulomb);
-        }   
-
-        public static Vector3 MorseForce(Atom a, Atom b)
+        
+        public static Vector3 ElectromagneticForce(Atom a, Atom b)
         {
             var r_vec = a.position - b.position;
             float r = r_vec.Length;
 
-            if (r < 1e-6f) return Vector3.Zero;
+            //Console.WriteLine($"r = {r}, radius_sum = {a.radius + b.radius}");
+
+            if (r < a.radius + b.radius) return Vector3.Zero;
 
             var dir = r_vec / r;
 
-            // --- MORSE PARAMETERS (tune these) ---
-            float D = 1.0f;     // well depth (energy)
-            float a_param = 3.0f; // stiffness
-            float r0 = 1.0f;    // equilibrium distance
+            float k = UnitMaster.K_SCALED;
 
-            // Morse force
-            float expTerm = MathF.Exp(-a_param * (r - r0));
-            float forceMag = 2 * D * a_param * (1 - expTerm) * expTerm;
+            float q1 = a.charge; // already in units of e
+            float q2 = b.charge;
+
+            float softening = 0.1f;
+            float forceMag = k * q1 * q2 / ((r * r) + (softening * softening));
 
             return dir * forceMag;
         }
+        public static float OrbitalAlignment(Orbital a, Orbital b, Vector3 rDir)
+        {
+            float da = MathF.Max(0, Vector3.Dot(a.GetDirection(), rDir)); // TODO Atom.GetBondAxis
+            float db = MathF.Max(0, Vector3.Dot(b.GetDirection(), -rDir));
+
+            return da * db;
+        }
+        /*
+        public static bool TryElectronTransfer(Atom a, Atom b)
+        {
+            float energyBefore = SystemEnergy(a, b);
+
+            // simulate swap
+            MoveElectron(a, b); // TODO 
+
+            float energyAfter = SystemEnergy(a, b);
+
+            if (energyAfter < energyBefore)
+                return true; // keep transfer
+
+            UndoTransfer(); // TODO 
+            return false;
+        }
+        */
+        public static bool CanBond(Atom a, Atom b, Orbital oa, Orbital ob, Vector3 rDir)
+        {
+            float alignment = OrbitalAlignment(oa, ob, rDir);
+
+            float r = (a.position - b.position).Length;
+            float r0 = (a.sigma + b.sigma) * 0.5f;
+
+            bool distanceOk = MathF.Abs(r - r0) < r0 * 0.3f;
+
+            bool orbitalsAvailable =
+                oa.GetAvailability() > 0 &&
+                ob.GetAvailability() > 0;
+
+            return alignment > 0.6f && distanceOk && orbitalsAvailable;
+        }
     }
+
 }
