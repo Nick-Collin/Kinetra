@@ -2,42 +2,61 @@ using Kinetra.Render;
 
 namespace Kinetra.Graphics
 {
+    static class ShaderManager
+    {
+        static Dictionary<string, Shader> cache = new();
+
+        public static Shader Get(string name)
+        {
+            if (cache.TryGetValue(name, out var s))
+            {
+                Console.WriteLine($"[ShaderManager] Cache HIT -> {name}");
+                return s;
+            }
+
+            Console.WriteLine($"[ShaderManager] Loading shader -> {name}");
+
+            var vertexPath = $"shaders/{name}/{name}.vert";
+            var fragmentPath = $"shaders/{name}/{name}.frag";
+
+            var shader = new Shader(vertexPath, fragmentPath);
+
+            cache[name] = shader;
+
+            Console.WriteLine($"[ShaderManager] Shader loaded and cached -> {name}");
+
+            return shader;
+        }
+
+        public static void DisposeAll()
+        {
+            Console.WriteLine($"[ShaderManager] Disposing all shaders ({cache.Count})");
+
+            foreach (var kv in cache)
+            {
+                Console.WriteLine($"[ShaderManager] Disposing -> {kv.Key}");
+                kv.Value.Dispose();
+            }
+
+            cache.Clear();
+
+            Console.WriteLine("[ShaderManager] All shaders disposed");
+        }
+    }
+
     public class Material
     {
         public Shader? shader;
-        private readonly string shaders_path = "shaders\\";
 
         public Material(string shaderName = "default")
         {
-            LoadShader(shaderName);
+            shader = ShaderManager.Get(shaderName);
         }
 
         public virtual void Use()
         {
             shader?.Use();
-        }
-
-        public void LoadShader(string shaderName)
-        {
-            string vertexPath = Path.Combine(shaders_path, shaderName + "\\" + shaderName + ".vert");
-            Console.WriteLine(vertexPath);
-            string fragmentPath = Path.Combine(shaders_path, shaderName + "\\" + shaderName + ".frag");
-            Console.WriteLine(fragmentPath);
-
-            if (!File.Exists(vertexPath) || !File.Exists(fragmentPath))
-            {
-                Console.WriteLine($"Shader files not found: {vertexPath} or {fragmentPath}");
-                return;
-            }
-
-            shader?.Dispose(); // Dispose do shader antigo, se existir
-            shader = new Shader(vertexPath, fragmentPath);
-        }
-
-        public void Dispose()
-        {
-            shader?.Dispose();
-        }
+        }       
     }
 
         public class PointMaterial : Material
@@ -63,17 +82,20 @@ namespace Kinetra.Graphics
     public class SingleColoredMaterial : Material
     {
         public Vector3 color;
+        public float alpha;
 
-        public SingleColoredMaterial(Vector3 color, string shaderName = "colored")
+        public SingleColoredMaterial(Vector3 color, float alpha = 1.0f,  string shaderName = "colored")
             : base(shaderName)
         {
             this.color = color;
+            this.alpha = alpha;
         }
 
         public override void Use()
         {
             base.Use();
             shader?.SetVector3("uColor", color);
+            shader?.SetFloat("alpha", alpha);
         }
     }
 

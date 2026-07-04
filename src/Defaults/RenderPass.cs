@@ -16,9 +16,14 @@ public class RenderLogic : RenderPass
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        GL.Disable(EnableCap.CullFace);
 
         foreach (var entity in scene.Entities)
         {
+            if (entity.material is SingleColoredMaterial)
+                {
+                    GL.DepthMask(false);
+                }
             entity.material?.Use();
 
             var model = entity.transform.GetModelMatrix();
@@ -37,6 +42,7 @@ public class RenderLogic : RenderPass
             entity.buffer.Bind();
 
             GL.DrawElements(entity.renderMode, entity.mesh.indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DepthMask(true);
 
         }
     }

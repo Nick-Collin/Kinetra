@@ -3,8 +3,9 @@
 out vec4 outputColor;
 
 uniform vec3 uColor;
+uniform float alpha;
 
 void main()
 {
-        outputColor = vec4(uColor, 1.0);
+        outputColor = vec4(uColor, alpha);
 }

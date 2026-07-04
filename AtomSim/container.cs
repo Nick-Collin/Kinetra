@@ -1,6 +1,8 @@
 using Kinetra.Entities;
 using Kinetra.Graphics;
 
+//TODO move mesh criation to MeshFactoy
+
 public class BoxContainer : Entity
 {
     public BoxContainer(Vector3 min, Vector3 max)

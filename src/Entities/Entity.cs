@@ -23,7 +23,6 @@ namespace Kinetra.Entities
         public void Dispose()
         {
             buffer.Dispose();
-            material.Dispose();
         }
     }
 }
